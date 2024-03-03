@@ -1,0 +1,750 @@
+1)
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+struct Day {
+    char *dayName;
+    int day, month, year;
+    char *activityDescription;
+};
+
+void createCalendar(struct Day *calendar) {
+    char *dayName[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    for (int i = 0; i < 7; i++) {
+        calendar[i].dayName = strdup(dayName[i]);
+        calendar[i].activityDescription = (char*)malloc(256 * sizeof(char));
+    }
+}
+
+void readActivities(struct Day *calendar) {
+    for(int i = 0; i < 7; i++) {
+        printf("Enter date for %s in DD/MM/YY: ", calendar[i].dayName);
+        scanf("%d %d %d", &calendar[i].day, &calendar[i].month, &calendar[i].year);
+        printf("Enter activity for %s: ", calendar[i].dayName);
+        scanf("%s", calendar[i].activityDescription);
+    }
+}
+
+void displayCalendar(struct Day *calendar) {
+    printf("%-10s %-10s %-10s\n", "Day", "Date", "Activity");
+    for(int i = 0; i < 7; i++) {
+        printf("%-10s %02d/%02d/%02d %-20s\n", calendar[i].dayName, calendar[i].day, calendar[i].month, calendar[i].year, calendar[i].activityDescription);
+    }
+}
+
+int main() {
+    struct Day calendar[7];
+    createCalendar(calendar);
+    readActivities(calendar);
+    displayCalendar(calendar);
+    return 0;
+}
+------------------------------------------------------------------------
+2)#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+char str[100], pat[50], rep[50], ans[100];
+int i, j, c, m, k, flag = 0;
+
+void stringmatch() {
+    i = m = c = j = 0;
+    while (str[c] != '\0') {
+        if (str[m] == pat[i]) {
+            i++, m++;
+            if (pat[i] == '\0') {
+                flag = 1;
+                for (k = 0; rep[k] != '\0'; k++, j++)
+                    ans[j] = rep[k];
+                i = 0;
+                c = m;
+            }
+        }
+        else {
+            ans[j] = str[c];
+            j++;
+            c++;
+            m = c;
+            i = 0;
+        }
+    }
+    ans[j] = '\0'; // Null terminate the resultant string
+}
+
+int main() {
+    printf("\nEnter main string: ");
+    gets(str); // Note: gets() is deprecated, consider using fgets() instead
+    printf("\nEnter pattern string: ");
+    gets(pat);
+    printf("Enter replace string: ");
+    gets(rep);
+    stringmatch();
+    if (flag == 1)
+        printf("\nThe resultant string: %s", ans);
+    else
+        printf("\nPattern not found.");
+    return 0;
+}
+-----------------------------------------------------------------------------------
+3)#include <stdio.h>
+
+#define MAX 5
+
+int top = -1;
+int stack[MAX];
+
+void push(int item) {
+    if (top == MAX - 1) {
+        printf("Overflow\n");
+    } else {
+        stack[++top] = item;
+    }
+}
+
+int pop() {
+    if (top == -1) {
+        printf("Underflow\n");
+        return -1; // Return a sentinel value indicating underflow
+    } else {
+        return stack[top--];
+    }
+}
+
+int isPalindrome() {
+    int i, j;
+    for (i = 0, j = top; i <= top / 2; i++, j--) {
+        if (stack[i] != stack[j]) {
+            return 0; // Not a palindrome
+        }
+    }
+    return 1; // Palindrome
+}
+
+void display() {
+    if (top == -1) {
+        printf("Stack is empty\n");
+    } else {
+        printf("Stack elements:\n");
+        for (int i = top; i >= 0; i--) {
+            printf("%d\n", stack[i]);
+        }
+    }
+}
+
+int main() {
+    int choice, item;
+    do {
+        printf("\nMain Menu\n");
+        printf("1. Push\n");
+        printf("2. Pop\n");
+        printf("3. Check Palindrome\n");
+        printf("4. Display\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter element to push: ");
+                scanf("%d", &item);
+                push(item);
+                break;
+            case 2:
+                item = pop();
+                if (item != -1) {
+                    printf("Popped item: %d\n", item);
+                }
+                break;
+            case 3:
+                if (isPalindrome()) {
+                    printf("Stack content is a palindrome\n");
+                } else {
+                    printf("Stack content is not a palindrome\n");
+                }
+                break;
+            case 4:
+                display();
+                break;
+            case 5:
+                printf("Exiting...\n");#include<stdio.h>
+
+void push(char);
+char pop();
+void eval();
+int prec(char);
+
+char infix[30], postfix[30], stack[30];
+int top = -1;
+
+int main() {
+    printf("Enter a valid infix expression: ");
+    scanf("%s", infix);
+    eval();
+    printf("Postfix expression is %s\n", postfix);
+    return 0;
+}
+
+void eval() {
+    int i = 0, j = 0;
+    char symb, temp;
+    
+
+    for (i = 0; infix[i] != '\0'; i++) {
+        symb = infix[i];
+        switch (symb) {
+            case '(':
+                push(symb);
+                break;
+            case ')':
+                temp = pop();
+                while (temp != '(') {
+                    postfix[j] = temp;
+                    j++;
+                    temp = pop();
+                }
+                break;
+            case '+':
+            case '-':
+            case '*':
+            case '/':
+            case '%':
+            case '^':
+                while (prec(stack[top]) >= prec(symb)) {
+                    temp = pop();
+                    postfix[j] = temp;
+                    j++;
+                }
+                push(symb);
+                break;
+            default:
+                postfix[j] = symb;
+                j++;
+        }
+    }
+
+    while (top > -1) {
+        temp = pop();
+        postfix[j] = temp;
+        j++;
+    }
+    postfix[j] = '\0';
+}
+
+void push(char item) {
+    top++;
+    stack[top] = item;
+}
+
+char pop() {
+    char item;
+    if (top == -1) {
+        printf("Stack Underflow\n");
+        return -1;
+    } else {
+        item = stack[top];
+        top--;
+        return item;
+    }
+}
+
+int prec(char symbol) {
+    switch (symbol) {
+        case '^':
+            return 3;
+        case '*':
+        case '/':
+        case '%':
+            return 2;
+        case '+':
+        case '-':
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+                break;
+            default:
+                printf("Invalid choice\n");
+        }
+    } while (choice != 5);
+
+    return 0;
+}
+-------------------------------------------------------------------------------------
+4)#include<stdio.h>
+
+void push(char);
+char pop();
+void eval();
+int prec(char);
+
+char infix[30], postfix[30], stack[30];
+int top = -1;
+
+int main() {
+    printf("Enter a valid infix expression: ");
+    scanf("%s", infix);
+    eval();
+    printf("Postfix expression is %s\n", postfix);
+    return 0;
+}
+
+void eval() {
+    int i = 0, j = 0;
+    char symb, temp;
+   
+
+    for (i = 0; infix[i] != '\0'; i++) {
+        symb = infix[i];
+        switch (symb) {
+            case '(':
+                push(symb);
+                break;
+            case ')':
+                temp = pop();
+                while (temp != '(') {
+                    postfix[j] = temp;
+                    j++;
+                    temp = pop();
+                }
+                break;
+            case '+':
+            case '-':
+            case '*':
+            case '/':
+            case '%':
+            case '^':
+                while (prec(stack[top]) >= prec(symb)) {
+                    temp = pop();
+                    postfix[j] = temp;
+                    j++;
+                }
+                push(symb);
+                break;
+            default:
+                postfix[j] = symb;
+                j++;
+        }
+    }
+
+    while (top > -1) {
+        temp = pop();
+        postfix[j] = temp;
+        j++;
+    }
+    postfix[j] = '\0';
+}
+
+void push(char item) {
+    top++;
+    stack[top] = item;
+}
+
+char pop() {
+    char item;
+    if (top == -1) {
+        printf("Stack Underflow\n");
+        return -1;
+    } else {
+        item = stack[top];
+        top--;
+        return item;
+    }
+}
+
+int prec(char symbol) {
+    switch (symbol) {
+        case '^':
+            return 3;
+        case '*':
+        case '/':
+        case '%':
+            return 2;
+        case '+':
+        case '-':
+            return 1;
+        default:
+            return 0;
+    }
+}
+------------------------------------------------------------------------------------
+5 a)
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+
+void push(int[], int *, int);
+int pop(int[], int *);
+
+int main() {
+    int iastack[50], i, op1, op2, res;
+    char expr[50], symb;
+    int top = -1;
+
+    printf("\nEnter a valid postfix expression: ");
+    scanf("%s", expr);
+
+    for (i = 0; i < strlen(expr); i++) {
+        symb = expr[i];
+        if (isdigit(symb)) {
+            push(iastack, &top, symb - '0');
+        } else {
+            op2 = pop(iastack, &top);
+            op1 = pop(iastack, &top);
+            switch (symb) {
+                case '+':
+                    res = op1 + op2;
+                    break;
+                case '-':
+                    res = op1 - op2;
+                    break;
+                case '*':
+                    res = op1 * op2;
+                    break;
+                case '/':
+                    if (op2 != 0)
+                        res = op1 / op2;
+                    else {
+                        printf("Error: Division by zero\n");
+                        exit(1);
+                    }
+                    break;
+                case '%':
+                    if (op2 != 0)
+                        res = op1 % op2;
+                    else {
+                        printf("Error: Modulo by zero\n");
+                        exit(1);
+                    }
+                    break;
+                case '^':
+                    res = (int)pow(op1, op2);
+                    break;
+            }
+            push(iastack, &top, res);
+        }
+    }
+    res = pop(iastack, &top);
+    printf("\nValue of %s expression is %d\n", expr, res);
+    return 0;
+}
+
+void push(int Stack[], int *t, int elem) {
+    *t = *t + 1;
+    Stack[*t] = elem;
+}
+
+int pop(int Stack[], int *t) {
+    int elem;
+    elem = Stack[*t];
+    *t = *t - 1;
+    return elem;
+}
+-----------------------------------------------------------------------------------
+5 b)#include <stdio.h>
+
+void towers(int, char, char, char);
+
+int main() {
+    int num;
+    printf("Enter the number of disks: ");
+    scanf("%d", &num);
+    printf("The sequence of moves involved in the Tower of Hanoi are:\n");
+    towers(num, 'A', 'C', 'B');
+    printf("\n");
+    return 0;
+}
+
+void towers(int num, char frompeg, char topeg, char auxpeg) {
+    if (num == 1) {
+        printf("\nMove disk 1 from peg %c to peg %c", frompeg, topeg);
+        return;
+    }
+    towers(num - 1, frompeg, auxpeg, topeg);
+    printf("\nMove disk %d from peg %c to peg %c", num, frompeg, topeg);
+    towers(num - 1, auxpeg, topeg, frompeg);
+}
+-------------------------------------------------------------------------------------
+6.#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define SIZE 5
+
+void insert(char [], int *, int *, char);
+char del(char [], int *, int *);
+void display(char [], int, int);
+bool qfull(int, int);
+bool qempty(int, int);
+
+int main() {
+    char q[SIZE];
+    int front = -1, rear = -1;
+    int choice;
+    char elem;
+
+    for (;;) {
+        printf("\nQueue Operations\n");
+        printf("=====================");
+        printf("\n1. Qinsert\n2. Qdelete\n3. Qdisplay\n4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar(); // Consume newline character
+
+        switch (choice) {
+            case 1:
+                if (!qfull(front, rear)) {
+                    printf("\nEnter an element: ");
+                    scanf("%c", &elem);
+                    insert(q, &front, &rear, elem);
+                } else {
+                    printf("\nQueue is Full\n");
+                }
+                break;
+
+            case 2:
+                if (!qempty(front, rear)) {
+                    elem = del(q, &front, &rear);
+                    printf("\nDeleted element is %c\n", elem);
+                } else {
+                    printf("\nQueue is Empty\n");
+                }
+                break;
+
+            case 3:
+                if (!qempty(front, rear)) {
+                    printf("\nContents of the Queue are:\n");
+                    display(q, front, rear);
+                } else {
+                    printf("\nQueue is Empty\n");
+                }
+                break;
+
+            case 4:
+                exit(0);
+
+            default:
+                printf("\nInvalid choice\n");
+                break;
+        }
+    }
+
+    return 0;
+}
+
+bool qfull(int front, int rear) {
+    if ((rear + 1) % SIZE == front)
+        return true;
+    else
+        return false;
+}
+
+bool qempty(int front, int rear) {
+    if (front == -1)
+        return true;
+    else
+        return false;
+}
+
+void insert(char queue[], int *front, int *rear, char val) {
+    if (*rear == -1) {
+        *front = *rear = 0;
+    } else {
+        *rear = (*rear + 1) % SIZE;
+    }
+    queue[*rear] = val;
+}
+
+char del(char queue[], int *front, int *rear) {
+    char el = queue[*front];
+    if (*front == *rear) {
+        *front = *rear = -1;
+    } else {
+        *front = (*front + 1) % SIZE;
+    }
+    return el;
+}
+
+void display(char queue[], int front, int rear) {
+    int i;
+    if (front <= rear) {
+        for (i = front; i <= rear; i++) {
+            printf("%c\t", queue[i]);
+        }
+    } else {
+        printf("\n");
+        for (i = front; i < SIZE; i++) {
+            printf("%c\t", queue[i]);
+        }
+        for (i = 0; i <= rear; i++) {
+            printf("%c\t", queue[i]);
+        }
+        printf("\n");
+    }
+}
+-------------------------------------------------------------------------------------------------
+7.#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+struct node {
+    char usn[11], name[40], prog[4];
+    int sem;
+    char ph[11];
+    struct node *link;
+};
+
+typedef struct node* PTR;
+
+PTR get(void);
+void freeN(PTR);
+PTR insrear(PTR);
+PTR delfront(PTR);
+PTR insfront(PTR);
+PTR delrear(PTR);
+void disp(PTR);
+
+int main() {
+    PTR first = NULL;
+    int ch, num, i;
+    
+    printf("\nEnter the number of Students N: ");
+    scanf("%d", &num);
+
+    for (i = 0; i < num; i++) {
+        printf("Enter Data for Node %d: ", i + 1);
+        first = insfront(first);
+    }
+
+    for (;;) {
+        printf("\nQUEUE OPERATIONS");
+        printf("====================");
+        printf("\n1. Insert Front\n2. Insert Rear\n3. Delete Front\n4. Delete Rear\n5. Display\n6. Exit\n");
+        printf("\nEnter your choice: ");
+        scanf("%d", &ch);
+        switch (ch) {
+            case 1:
+                first = insfront(first);
+                break;
+            case 2:
+                first = insrear(first);
+                break;
+            case 3:
+                first = delfront(first);
+                break;
+            case 4:
+                first = delrear(first);
+                break;
+            case 5:
+                disp(first);
+                break;
+            case 6:
+                exit(0);
+        }
+    }
+    return 0;
+}
+
+PTR get() {
+    PTR newborn;
+    newborn = (PTR)malloc(sizeof(struct node));
+    if (newborn == NULL) {
+        printf("\nMemory Overflow");
+        exit(0);
+    }
+    printf("\nEnter USN: ");
+    scanf("%s", newborn->usn);
+    printf("Enter name: ");
+    scanf("%s", newborn->name);
+    printf("Enter Program name: ");
+    scanf("%s", newborn->prog);
+    printf("Enter semester: ");
+    scanf("%d", &newborn->sem);
+    printf("Enter Phone no: ");
+    scanf("%s", newborn->ph);
+    return newborn;
+}
+
+void freeN(PTR x) {
+    free(x);
+}
+
+PTR insrear(PTR first) {
+    PTR temp, cur;
+    temp = get();
+    temp->link = NULL;
+    if (first == NULL)
+        return temp;
+    cur = first;
+    while (cur->link != NULL) {
+        cur = cur->link;
+    }
+    cur->link = temp;
+    return first;
+}
+
+PTR delfront(PTR first) {
+    PTR temp;
+    if (first == NULL) {
+        printf("\nSLL is empty cannot delete");
+        return first;
+    }
+    temp = first;
+    first = first->link;
+    printf("\nNode deleted is %s : ", temp->name);
+    freeN(temp);
+    return first;
+}
+
+void disp(PTR first) {
+    PTR curr;
+    int count = 0;
+    if (first == NULL) {
+        printf("\nSLL is empty ");
+        return;
+    }
+    printf("\nThe contents of SLL are : ");
+    curr = first;
+    printf("\nUSN\t\tName\tProgram\tSem\tPhone num");
+    while (curr != NULL) {
+        printf("\n%10s\t%s\t%s\t%d\t%s", curr->usn, curr->name, curr->prog, curr->sem, curr->ph);
+        curr = curr->link;
+        count++;
+    }
+    printf("\n\nSLL has %d nodes", count);
+}
+
+PTR insfront(PTR first) {
+    PTR temp;
+    temp = get();
+    temp->link = first;
+    return temp;
+}
+
+PTR delrear(PTR first) {
+    PTR cur, prev;
+    if (first == NULL) {
+        printf("\nSLL is empty cannot delete");
+        return first;
+    }
+    prev = NULL;
+    cur = first;
+    if (cur->link == NULL) {
+        printf("\nNode deleted for %s : ", cur->name);
+        freeN(cur);
+        return NULL;
+    }
+    while (cur->link != NULL) {
+        prev = cur;
+        cur = cur->link;
+    }
+    prev->link = cur->link;
+    printf("\nNode deleted for %s : ", cur->name);
+    freeN(cur);
+    return first;
+}
+---------------------------------------------------------------------------------------------------
