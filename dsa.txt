@@ -670,3 +670,52 @@ PTR delrear(PTR first) {
     return first;
 }
 ---------------------------------------------------------------------------------------------------
+8)
+show array representation of two polynomial write a c function to add two polynomial A(x) and B(x) A(x)=2x^10+x+3, B(x)=x^5+10x^3+3x^2+12
+
+#include<stdio.h>
+
+#define size 11
+
+void add(int pA[],int pB[],int pC[]){
+    for (int i = 0; i < size; i++)
+    {
+        pC[i]=pA[i]+pB[i];
+        /* code */
+    }
+    
+}
+
+void pri(int p[]){
+    for (int i=size-1; i>=0; i--)
+    {
+        //printf("polynomial");
+        if (p[i]!=0)
+        {
+            if (i!=0)
+            {
+                printf("%dx^%d+",p[i],i);
+                /* code */
+            }
+            else{
+                printf("%d",p[i]);
+            }
+            
+            /* code */
+        }
+        
+        /* code */
+    }
+    printf("\n");
+}
+int main(){
+    int pA[size]={3,1,0,0,0,0,0,0,0,0,2};
+    int  pB[size]={12,0,3,10,0,1};
+    int pC[size]={0};
+    add(pA,pB,pC);
+    pri(pA);
+    printf("\n");
+    pri(pB);
+    pri(pC);
+    return 0;
+}
