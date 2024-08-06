@@ -155,7 +155,26 @@ WHERE ID = 1;
 -- Select data from the mini table
 SELECT * FROM mini;
 
+--------++++++++++++++++-----
+Here are short explanations for each term:
 
+1. **Catalog**: A collection of database objects, such as tables, views, and indexes.
+
+2. **Query**: A request for data or information from a database, typically written in SQL.
+
+3. **Schema**: The structure or design of a database, including tables, columns, and relationships.
+
+4. **Relation**: A table in a relational database, representing data in rows and columns.
+
+5. **Primary Key**: A unique identifier for a record in a table, ensuring no duplicate entries.
+
+6. **Secondary Key**: An additional key used to access data in a table, which is not necessarily unique.
+
+7. **Null**: A special marker indicating the absence of a value in a database field.
+
+8. **Unique**: A constraint that ensures all values in a column are distinct across records.
+
+9. **Data Type**: Defines the type of data a column can hold, such as integer, varchar, or date.
 
 
 
