@@ -1,0 +1,241 @@
+1) import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from sklearn.datasets import fetch_california_housing
+
+# Load the California Housing dataset
+california = fetch_california_housing(as_frame=True)
+df = california.frame
+
+# Numerical features
+numerical_features = df.select_dtypes(include=['number']).columns
+
+# Histograms
+plt.figure(figsize=(15, 10))
+for i, feature in enumerate(numerical_features):
+    plt.subplot(3, 3, i + 1)
+    sns.histplot(df[feature], kde=True)
+    plt.title(f'Histogram of {feature}')
+plt.tight_layout()
+plt.show()
+
+# Box plots and outlier analysis
+plt.figure(figsize=(15, 10))
+for i, feature in enumerate(numerical_features):
+    plt.subplot(3, 3, i + 1)
+    sns.boxplot(y=df[feature])
+    plt.title(f'Boxplot of {feature}')
+plt.tight_layout()
+plt.show()
+
+# Outlier identification (using IQR method)
+def detect_outliers_iqr(data):
+    q1 = data.quantile(0.25)
+    q3 = data.quantile(0.75)
+    iqr = q3 - q1
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+    outliers = data[(data < lower_bound) | (data > upper_bound)]
+    return outliers
+
+print("Outlier Analysis:")
+for feature in numerical_features:
+    outliers = detect_outliers_iqr(df[feature])
+    print(f"\nFeature: {feature}")
+    print(f"Number of outliers: {len(outliers)}")
+    if len(outliers) > 0 and len(outliers) < 20 :
+      print(f"Outlier values: {outliers.values}")
+    elif len(outliers) >= 20:
+        print("Too many outliers to display.")
+    else:
+        print("No outliers detected.")
+-----------------------------------------------------------------------------------------------
+2)
+ import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.datasets import fetch_california_housing
+
+def analyze_california_housing():
+    """
+    Computes and visualizes the correlation matrix and pair plot for the California Housing dataset.
+    """
+    try:
+        # Load the California Housing dataset
+        california = fetch_california_housing(as_frame=True)
+        df = california.frame
+
+        # Compute the correlation matrix
+        correlation_matrix = df.corr()
+
+        # Visualize the correlation matrix using a heatmap
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+        plt.title('Correlation Matrix of California Housing Features')
+        plt.show()
+
+        # Create a pair plot to visualize pairwise relationships between features
+        sns.pairplot(df)
+        plt.show()
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    analyze_california_housing()
+-------------------------------------------------------------------------------------
+3)
+import numpy as np
+from sklearn.datasets import load_iris
+import matplotlib.pyplot as plt
+
+def pca(X, n_components):
+    """
+    Performs Principal Component Analysis (PCA).
+
+    Args:
+        X (numpy.ndarray): Input data matrix (n_samples, n_features).
+        n_components (int): Number of principal components to retain.
+
+    Returns:
+        numpy.ndarray: Transformed data matrix (n_samples, n_components).
+    """
+
+    # 1. Center the data
+    X_meaned = X - np.mean(X, axis=0)
+
+    # 2. Compute the covariance matrix
+    cov_mat = np.cov(X_meaned, rowvar=False)
+
+    # 3. Compute eigenvalues and eigenvectors
+    eigen_values, eigen_vectors = np.linalg.eigh(cov_mat)
+
+    # 4. Sort eigenvalues and eigenvectors in descending order
+    sorted_index = np.argsort(eigen_values)[::-1]
+    sorted_eigenvectors = eigen_vectors[:, sorted_index]
+
+    # 5. Select the top n_components eigenvectors
+    principal_components = sorted_eigenvectors[:, :n_components]
+
+    # 6. Transform the data
+    X_transformed = np.dot(X_meaned, principal_components)
+
+    return X_transformed
+
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+# Apply PCA to reduce dimensionality to 2 components
+X_pca = pca(X, 2)
+
+# Visualize the results
+plt.figure(figsize=(8, 6))
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, cmap='viridis')
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.title('PCA of Iris Dataset (2 Components)')
+plt.colorbar(ticks=np.unique(y), label='Species')
+plt.show()
+--------------------------------------------------------------------------------
+4)
+import pandas as pd
+
+def find_s_algorithm():
+    # Define the dataset directly instead of reading from a CSV file
+    data = pd.DataFrame({
+        'Sky': ['Sunny', 'Sunny', 'Cloudy', 'Rainy', 'Sunny'],
+        'Temperature': ['Warm', 'Hot', 'Warm', 'Cold', 'Warm'],
+        'Humidity': ['Normal', 'High', 'High', 'Normal', 'Normal'],
+        'Wind': ['Strong', 'Weak', 'Strong', 'Strong', 'Weak'],
+        'PlayTennis': ['Yes', 'No', 'Yes', 'No', 'Yes']  # Target column
+    })
+
+    print("Training data:")
+    print(data)
+
+    attributes = data.columns[:-1]  # All columns except the last one
+    class_label = data.columns[-1]  # The last column is the target variable
+
+    hypothesis = ['?' for _ in attributes]  # Initialize with the most general hypothesis
+
+    for index, row in data.iterrows():
+        if row[class_label] == 'Yes':  # Process only positive examples
+            for i, value in enumerate(row[attributes]):
+                if hypothesis[i] == '?' or hypothesis[i] == value:
+                    hypothesis[i] = value  # Retain attribute value if it matches
+                else:
+                    hypothesis[i] = '?'  # Generalize otherwise
+
+    return hypothesis
+
+
+# Run the algorithm without worrying about file paths
+hypothesis = find_s_algorithm()
+print("\nThe final hypothesis is:", hypothesis)
+---------------------------------------------------------------------------
+5)
+import numpy as np
+import matplotlib.pyplot as plt
+
+def knn_classify(train_x, train_y, test_x, k):
+    """
+    Classifies test_x using k-Nearest Neighbors algorithm.
+
+    Args:
+        train_x: Training data features (1D array).
+        train_y: Training data labels (1D array).
+        test_x: Test data features (1D array).
+        k: Number of neighbors to consider.
+
+    Returns:
+        Predicted labels for test_x (1D array).
+    """
+
+    predictions = []
+    for test_point in test_x:
+        distances = np.abs(train_x - test_point)  # Calculate absolute distances
+        nearest_indices = np.argsort(distances)[:k]  # Find indices of k nearest neighbors
+        nearest_labels = train_y[nearest_indices]
+
+        # Determine the most frequent label among the k neighbors
+        unique_labels, counts = np.unique(nearest_labels, return_counts=True)
+        predicted_label = unique_labels[np.argmax(counts)]
+        predictions.append(predicted_label)
+
+    return np.array(predictions)
+
+# Generate 100 random values in the range [0, 1]
+np.random.seed(42)  # For reproducibility
+x = np.random.rand(100)
+
+# Label the first 50 points
+y = np.zeros(100)
+y[:50] = (x[:50] <= 0.5).astype(int) + 1 #Class 1 if <= 0.5, Class 2 otherwise
+y[50:] = -1 # initialize test values to -1, they will be overriden by knn prediction
+
+# Split data into training and test sets
+train_x, train_y = x[:50], y[:50]
+test_x = x[50:]
+
+# Classify the remaining points using KNN for different values of k
+k_values = [1, 2, 3, 4, 5, 20, 30]
+predictions = {}
+
+for k in k_values:
+    predictions[k] = knn_classify(train_x, train_y, test_x, k)
+    y[50:] = predictions[k]
+    print(f"Predictions for k={k}: {predictions[k]}")
+
+    # Plot the results for each k
+    plt.figure(figsize=(8, 6))
+    plt.scatter(train_x, np.zeros_like(train_x), c=train_y, marker='o', label='Training Data')
+    plt.scatter(test_x, np.zeros_like(test_x), c=predictions[k], marker='x', label=f'Test Data (k={k})')
+    plt.xlabel('x')
+    plt.ylabel('Class')
+    plt.title(f'KNN Classification (k={k})')
+    plt.legend()
+    plt.yticks([]) #remove y axis ticks
+    plt.show()
