@@ -1,0 +1,263 @@
+6)
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+
+def gaussian_kernel(x, x_query, tau):
+    return np.exp(-np.sum((x - x_query)**2, axis=1) / (2 * tau**2))
+
+def locally_weighted_regression(X, y, x_query, tau):
+    m = X.shape[0]
+    W = np.eye(m)
+    weights = gaussian_kernel(X, x_query, tau)
+    for i in range(m):
+        W[i, i] = weights[i]
+    theta = np.linalg.pinv(X.T @ W @ X) @ X.T @ W @ y
+    return x_query @ theta
+
+# Generate a synthetic dataset
+np.random.seed(0)
+X = np.linspace(0, 10, 100)
+y = np.sin(X) + 0.3 * np.random.randn(100)
+
+# Add intercept term to X
+X_matrix = np.vstack([np.ones_like(X), X]).T
+y = y.reshape(-1, 1)
+
+# Predict at multiple query points
+tau = 0.5  # Bandwidth parameter
+x_query_points = np.linspace(0, 10, 200)
+x_query_matrix = np.vstack([np.ones_like(x_query_points), x_query_points]).T
+y_preds = []
+
+for xq in x_query_matrix:
+    y_pred = locally_weighted_regression(X_matrix, y, xq, tau)
+    y_preds.append(y_pred)
+
+y_preds = np.array(y_preds)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.scatter(X, y, label='Training data', alpha=0.6)
+plt.plot(x_query_points, y_preds, color='red', label='LWR Fit')
+plt.title('Locally Weighted Regression')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.grid(True)
+plt.show()
+-------------------------------------------------------------------------------------------
+7)
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_california_housing
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import r2_score, mean_squared_error
+
+# --- LINEAR REGRESSION: California Housing Dataset --- #
+print("\n--- Linear Regression: California Housing Dataset ---\n")
+
+# Load dataset
+housing = fetch_california_housing()
+X = pd.DataFrame(housing.data, columns=housing.feature_names)
+y = housing.target
+
+# Use 'MedInc' (Median Income) as the feature
+X = X[['MedInc']]
+
+# Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train
+lr_model = LinearRegression()
+lr_model.fit(X_train, y_train)
+y_pred = lr_model.predict(X_test)
+
+# Results
+print(f"Coefficient: {lr_model.coef_[0]:.4f}")
+print(f"Intercept: {lr_model.intercept_:.4f}")
+print(f"R² Score: {r2_score(y_test, y_pred):.4f}")
+
+# Plot
+plt.figure(figsize=(8,5))
+plt.scatter(X_test, y_test, color='blue', label='Actual')
+plt.plot(X_test, y_pred, color='red', linewidth=2, label='Predicted')
+plt.xlabel('Median Income (MedInc)')
+plt.ylabel('House Value ($100,000s)')
+plt.title('Linear Regression: California Housing')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+# --- POLYNOMIAL REGRESSION: Auto MPG Dataset --- #
+print("\n--- Polynomial Regression: Auto MPG Dataset ---\n")
+
+# Load dataset
+url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data'
+columns = ['mpg','cylinders','displacement','horsepower','weight','acceleration','model_year','origin','car_name']
+auto_mpg = pd.read_csv(url, names=columns, na_values='?', comment='\t', sep='\s+', skipinitialspace=True)
+auto_mpg.dropna(inplace=True)
+
+# Feature and target
+X_poly = auto_mpg[['horsepower']].values
+y_poly = auto_mpg['mpg'].values
+
+# Split
+X_train, X_test, y_train, y_test = train_test_split(X_poly, y_poly, test_size=0.2, random_state=42)
+
+# Polynomial regression (degree=2)
+poly_model = make_pipeline(PolynomialFeatures(degree=2), LinearRegression())
+poly_model.fit(X_train, y_train)
+y_pred = poly_model.predict(X_test)
+
+# Evaluation
+print(f"R² Score: {r2_score(y_test, y_pred):.4f}")
+print(f"MSE: {mean_squared_error(y_test, y_pred):.4f}")
+
+# Plot
+X_line = np.linspace(X_poly.min(), X_poly.max(), 200).reshape(-1, 1)
+y_line = poly_model.predict(X_line)
+
+plt.figure(figsize=(8,5))
+plt.scatter(X_test, y_test, color='green', label='Actual')
+plt.plot(X_line, y_line, color='orange', linewidth=2, label='Polynomial Fit (deg=2)')
+plt.xlabel('Horsepower')
+plt.ylabel('MPG (Miles per Gallon)')
+plt.title('Polynomial Regression: Auto MPG')
+plt.legend()
+plt.grid(True)
+plt.show()
+------------------------------------------------------------------------------------------------
+8)
+from sklearn.datasets import load_breast_cancer
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Load Breast Cancer Dataset
+data = load_breast_cancer()
+X = data.data
+y = data.target
+feature_names = data.feature_names
+target_names = data.target_names
+
+# Split into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create and train Decision Tree model
+model = DecisionTreeClassifier(criterion="entropy", max_depth=4, random_state=42)
+model.fit(X_train, y_train)
+
+# Predict on test data
+y_pred = model.predict(X_test)
+
+# Evaluation
+print("Classification Report:\n", classification_report(y_test, y_pred, target_names=target_names))
+print("Accuracy Score:", accuracy_score(y_test, y_pred))
+
+# --- Classify a new sample ---
+# Let's take a random test sample
+sample_index = 0
+sample = X_test[sample_index].reshape(1, -1)
+sample_pred = model.predict(sample)
+print("\nPrediction for New Sample:")
+print("Predicted Class:", target_names[sample_pred[0]])
+print("Actual Class:", target_names[y_test[sample_index]])
+
+plt.figure(figsize=(20, 10))
+plot_tree(model, filled=True, feature_names=feature_names, class_names=target_names, rounded=True)
+plt.title("Decision Tree - Breast Cancer Classification")
+plt.show()
+
+----------------------------------------------------------------------------------------
+9)
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_olivetti_faces
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, classification_report
+
+# Load Olivetti Faces Dataset
+faces = fetch_olivetti_faces()
+X = faces.data          # Flattened image data (400 x 4096)
+y = faces.target        # Labels (0 to 39)
+
+# Split into train/test sets (e.g., 80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+# Train Naive Bayes Classifier
+model = GaussianNB()
+model.fit(X_train, y_train)
+
+# Predict
+y_pred = model.predict(X_test)
+
+# Evaluate
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy:", accuracy)
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Display sample predictions
+fig, axes = plt.subplots(2, 5, figsize=(12, 5))
+axes = axes.ravel()
+for i in range(10):
+    axes[i].imshow(X_test[i].reshape(64, 64), cmap='gray')
+    axes[i].set_title(f"Pred: {y_pred[i]}, True: {y_test[i]}")
+    axes[i].axis('off')
+plt.suptitle("Sample Test Images: Prediction vs Actual")
+plt.tight_layout()
+plt.show()
+----------------------------------------------------------------------------------------------
+10)
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_breast_cancer
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.metrics import confusion_matrix, classification_report
+
+# Load dataset
+data = load_breast_cancer()
+X = data.data
+y = data.target
+target_names = data.target_names
+
+# Apply KMeans clustering (2 clusters: malignant and benign)
+kmeans = KMeans(n_clusters=2, random_state=42, n_init=10)
+kmeans.fit(X)
+y_kmeans = kmeans.labels_
+
+# Evaluate clustering with confusion matrix
+print("Confusion Matrix:\n", confusion_matrix(y, y_kmeans))
+print("\nClassification Report:\n", classification_report(y, y_kmeans, target_names=target_names))
+
+# Reduce dimensions to 2D using PCA for visualization
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X)
+
+# Plot Actual Classes
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, cmap='coolwarm', s=30)
+plt.title("Actual Breast Cancer Classes")
+plt.xlabel("PCA Component 1")
+plt.ylabel("PCA Component 2")
+
+# Plot KMeans Clustering Result
+plt.subplot(1, 2, 2)
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y_kmeans, cmap='coolwarm', s=30)
+plt.title("K-Means Clustering Result")
+plt.xlabel("PCA Component 1")
+plt.ylabel("PCA Component 2")
+
+plt.tight_layout()
+plt.show()
