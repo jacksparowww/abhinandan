@@ -1,0 +1,288 @@
+1)
+# Clean installation of compatible gensim version without breaking numpy/scipy
+!pip install --upgrade --no-deps gensim
+
+# Now import gensim and load vectors
+from gensim.models import KeyedVectors
+import gensim.downloader as api
+
+# Load GloVe vectors
+word_vectors = api.load('glove-wiki-gigaword-100')
+
+# Test 1: kitten - cat + dog = ?
+result = word_vectors.most_similar(positive=['kitten', 'dog'], negative=['cat'], topn=1)
+print("Result of 'kitten - cat + dog':", result[0][0])
+
+# Test 2: orange - fruit + tropical = ?
+result = word_vectors.most_similar(positive=['orange', 'tropical'], negative=['fruit'], topn=1)
+print("Result of 'orange - fruit + tropical':", result[0][0])
+-------------------------------------------------------------
+2)# Install required libraries
+!pip install --quiet gensim matplotlib scikit-learn numpy
+
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
+import gensim.downloader as api
+import numpy as np
+
+# Load GloVe vectors
+word_vectors = api.load('glove-wiki-gigaword-100')
+
+# Technology-related words
+tech_words = ['computer', 'internet', 'software', 'hardware', 'network',
+              'data', 'cloud', 'robot', 'algorithm', 'technology']
+tech_words = [w for w in tech_words if w in word_vectors.key_to_index]
+
+# Get word vectors
+vectors = np.array([word_vectors[w] for w in tech_words])
+
+# t-SNE dimensionality reduction
+tsne = TSNE(n_components=2, random_state=42, perplexity=5)
+reduced = tsne.fit_transform(vectors)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+for i, word in enumerate(tech_words):
+    x, y = reduced[i]
+    plt.scatter(x, y)
+    plt.text(x + 0.02, y + 0.02, word, fontsize=12)
+plt.title("t-SNE of Technology Words")
+plt.xlabel("Dim 1")
+plt.ylabel("Dim 2")
+plt.show()
+
+# Display similar words
+input_word = 'computer'
+if input_word in word_vectors:
+    print(f"\nWords similar to '{input_word}':")
+    for word, score in word_vectors.most_similar(input_word, topn=5):
+        print(f"{word} ({score:.2f})")
+else:
+    print(f"'{input_word}' not in vocabulary.")
+---------------------------------------------------
+3)# Install gensim if not installed
+!pip install --quiet gensim
+
+from gensim.models import Word2Vec
+
+# Sample medical dataset
+medical_data = [
+    ["patient", "doctor", "nurse", "hospital", "treatment"],
+    ["cancer", "chemotherapy", "radiation", "surgery", "recovery"],
+    ["infection", "antibiotics", "diagnosis", "disease", "virus"],
+    ["heart", "disease", "surgery", "cardiology", "recovery"]
+]
+
+# Train Word2Vec model
+model = Word2Vec(medical_data, vector_size=10, window=2, min_count=1, epochs=50)
+
+# Find similar words
+input_word = "patient"
+if input_word in model.wv:
+    print(f"3 words similar to '{input_word}':")
+    for word, score in model.wv.most_similar(input_word, topn=3):
+        print(f"{word} (similarity: {score:.2f})")
+else:
+    print(f"'{input_word}' not in vocabulary.")
+-------------------------------------------------------
+4)word_embeddings = {
+    "ai": ["machine learning", "deep learning", "data science"],
+    "data": ["information", "dataset", "analytics"],
+    "science": ["research", "experiment", "technology"],
+    "learning": ["education", "training", "knowledge"],
+    "robot": ["automation", "machine", "mechanism"]
+}
+
+def enrich_prompt(prompt):
+    def find_similar(word):
+        return word_embeddings.get(word, [])
+
+    words = prompt.lower().split()
+    enriched = [
+        f"{w} ({', '.join(find_similar(w))})" if find_similar(w) else w
+        for w in words
+    ]
+    return " ".join(enriched)
+
+original_prompt = "Explain AI and its applications in science."
+print("Original Prompt:\n", original_prompt)
+print("\nEnriched Prompt:\n", enrich_prompt(original_prompt))
+---------------------------------------------------
+5)word_embeddings = {
+    "adventure": ["journey", "exploration", "quest"],
+    "robot": ["machine", "automation", "mechanism"],
+    "forest": ["woods", "jungle", "wilderness"],
+    "ocean": ["sea", "waves", "depths"],
+    "magic": ["spell", "wizardry", "enchantment"]
+}
+
+def create_paragraph(seed_word):
+    similar = word_embeddings.get(seed_word)
+    if not similar:
+        return f"Sorry, no similar words found for '{seed_word}'."
+    return (f"Once upon a time, there was a great {seed_word}. "
+            f"It was full of {', '.join(similar[:-1])}, and {similar[-1]}. "
+            "Everyone who experienced this always remembered it as a remarkable tale.")
+
+seed_word = "adventure"
+print("Generated Paragraph:")
+print(create_paragraph(seed_word))
+-----------------------------------------
+6)from transformers import pipeline
+
+sentiment = pipeline("sentiment-analysis")
+sentences = [
+    "I love using this product! It makes my life so much easier.",
+    "The service was terrible, and I'm very disappointed.",
+    "It's an average experience, nothing special but not bad either."
+]
+
+for s in sentences:
+    r = sentiment(s)[0]
+    print(f"Sentence: {s}\nSentiment: {r['label']} (Score: {r['score']:.2f})\n")
+--------------------------------------
+7)from transformers import pipeline
+
+summarizer = pipeline("summarization")
+text = """
+Artificial Intelligence (AI) is transforming various industries by automating tasks, improving
+efficiency, and enabling new capabilities. In healthcare, AI aids diagnosis, personalized medicine,
+and drug discovery. In business, it optimizes customer service, fraud detection, and supply chains.
+AI impacts daily life via smart assistants and recommendation systems, promising advances in education,
+transportation, and sustainability.
+"""
+summary = summarizer(text, max_length=50, min_length=20, do_sample=False)[0]['summary_text']
+print("Summary:", summary)
+---------------------------------------
+8)# Install necessary libraries
+!pip install langchain cohere langchain-community
+
+from langchain.llms import Cohere
+from langchain.prompts import PromptTemplate
+from langchain import LLMChain
+from google.colab import drive
+
+# Mount Google Drive and read file
+drive.mount('/content/drive')
+file_path = "/content/drive/MyDrive/sample_text.txt"  # Update as needed
+with open(file_path) as f:
+    text = f.read()
+
+# Setup Cohere API and prompt
+cohere_api_key = "YOUR_COHERE_API_KEY"  # Replace with your key
+llm = Cohere(cohere_api_key=cohere_api_key)
+prompt = PromptTemplate(template="Summarize the following text in three bullet points:\n{text}", input_variables=["text"])
+
+# Run chain and print result
+chain = LLMChain(llm=llm, prompt=prompt)
+print("Summarized Output:")
+print(chain.run(text))
+---------------------------------------------------------
+9)# Step 1: Install necessary libraries (run once in your environment)
+# !pip install langchain pydantic wikipedia-api cohere
+
+from langchain.llms import Cohere
+from langchain.prompts import PromptTemplate
+from langchain import LLMChain
+from pydantic import BaseModel
+import wikipediaapi
+import json
+
+# Pydantic schema for institution details
+class InstitutionDetails(BaseModel):
+    founder: str
+    founded: str
+    branches: str
+    employees: str
+    summary: str
+
+# Fetch Wikipedia summary
+def fetch_wikipedia_summary(institution_name):
+    wiki = wikipediaapi.Wikipedia(language='en',
+                                 user_agent="InstitutionInfoBot/1.0 (contact: youremail@example.com)")
+    page = wiki.page(institution_name)
+    return page.text if page.exists() else "No information available on Wikipedia for this institution."
+
+# Prompt template asking for JSON output
+prompt_template = """
+Extract the following information from the text and return it as JSON:
+- founder
+- founded (year)
+- current branches
+- number of employees
+- 4-line brief summary
+
+Text: {text}
+"""
+
+# Main program
+def main():
+    institution_name = input("Enter the name of the institution: ")
+    wiki_text = fetch_wikipedia_summary(institution_name)
+
+    cohere_api_key = "YOUR_COHERE_API_KEY"  # Replace with your API key
+    llm = Cohere(cohere_api_key=cohere_api_key)
+
+    prompt = PromptTemplate(input_variables=["text"], template=prompt_template)
+    chain = LLMChain(llm=llm, prompt=prompt)
+
+    response = chain.run(wiki_text)
+
+    try:
+        # Parse JSON from the response text (strip in case of extra chars)
+        data = json.loads(response.strip())
+        details = InstitutionDetails(**data)
+        print("\nInstitution Details:")
+        print(f"Founder: {details.founder}")
+        print(f"Founded: {details.founded}")
+        print(f"Branches: {details.branches}")
+        print(f"Employees: {details.employees}")
+        print(f"Summary: {details.summary}")
+    except Exception as e:
+        print("Error parsing response:", e)
+        print("Raw response was:")
+        print(response)
+
+if __name__ == "__main__":
+    main()
+----------------------------------
+10)# Install latest langchain and openai
+!pip install --upgrade langchain openai
+
+# Imports
+from langchain.llms import OpenAI
+from langchain.schema import Document
+from langchain.chains import RetrievalQA
+from langchain.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings.openai import OpenAIEmbeddings
+
+# Read your document
+file_path = "path_to_your_ipc_file.txt"  # Replace with your actual file path
+with open(file_path, "r", encoding="utf-8") as f:
+    ipc_text = f.read()
+
+# Split text into chunks
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+texts = text_splitter.split_text(ipc_text)
+
+# Create documents
+docs = [Document(page_content=t) for t in texts]
+
+# Setup embeddings and vectorstore (FAISS)
+embeddings = OpenAIEmbeddings(openai_api_key="YOUR_OPENAI_API_KEY")
+vectorstore = FAISS.from_documents(docs, embeddings)
+
+# Setup retrieval QA chain
+llm = OpenAI(openai_api_key="YOUR_OPENAI_API_KEY", temperature=0)
+qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=vectorstore.as_retriever())
+
+# Interactive Q&A
+print("Ask questions about the Indian Penal Code (type 'exit' to stop):")
+while True:
+    query = input("Your question: ")
+    if query.lower() == "exit":
+        print("Goodbye!")
+        break
+    answer = qa.run(query)
+    print(f"Answer: {answer}")
