@@ -169,7 +169,7 @@ with open(file_path) as f:
     text = f.read()
 
 # Setup Cohere API and prompt
-cohere_api_key = "YOUR_COHERE_API_KEY"  # Replace with your key
+cohere_api_key = "h1PTt2V4cpSh7Z6UDRKXtgs0SkOQvYHkUlaVH1Ea"  # Replace with your key
 llm = Cohere(cohere_api_key=cohere_api_key)
 prompt = PromptTemplate(template="Summarize the following text in three bullet points:\n{text}", input_variables=["text"])
 
